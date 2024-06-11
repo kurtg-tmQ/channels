@@ -1,0 +1,14 @@
+host: "https"
+receiptCallback: "https"
+
+sms:
+  twilio:
+    - number: "+1"
+      key: "A"
+      secret": "d"
+
+mail:
+  host: "t"
+  port: "465"
+  user: "a"
+  password: "p"
