@@ -47,7 +47,7 @@ export class TwilioSMS extends Sms {
                 to = this.isNumberValid(to);
                 let json = {
                     to: to,
-                    from: this.Identity,
+                    from: this.Number,
                     body: message,
                     statusCallback: Server.Config.receiptCallback
                 };
@@ -55,15 +55,15 @@ export class TwilioSMS extends Sms {
                     json.mediaUrl = attachment;
                 this.Instance.messages.create(json, (err, response) => {
                     if (err) {
-                        Utilities.showError("Error sending SMS/MMS with `%s` (%s) err: %s", this.Identity, this.Type, err);
+                        Utilities.showError("Error sending SMS/MMS with `%s` (%s) err: %s", this.Number, this.Provider, err);
                         resolve({
                             code: err.code,
                             messageId: null,
                             status: "FAILED",
-                            error: `Failed sending request! response: ${JSON.stringify(err)} ${this.Identity}(${this.type})`
+                            error: `Failed sending request! response: ${JSON.stringify(err)} ${this.Number}(${this.Provider})`
                         });
                     } else if (!response) {
-                        Utilities.showError("Failed sending SMS/MMS with `%s` (%s) err: %s", this.Identity, this.Type, "No Response");
+                        Utilities.showError("Failed sending SMS/MMS with `%s` (%s) err: %s", this.Number, this.Provider, "No Response");
                         resolve({
                             code: 500,
                             messageId: null,

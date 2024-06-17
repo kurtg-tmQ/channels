@@ -28,6 +28,22 @@ export const ROLES = {
     ADMIN: 0x2,
 };
 
+class Notifications {
+    constructor(id, createdAt, message, attachment, msgId = "", status = "queued") {
+        this.userId = id;
+        this.message = message;
+        this.attachment = attachment;
+        this.createdAt = createdAt;
+        this.msgId = msgId;
+        this.status = status;
+    }
+    save() {
+        const update = DB.Notification.insert(this);
+        if (update && update._str) return update._str;
+        return update;
+    }
+}
+
 export class Recipients {
     #config = {
         sms: { enabled: true, number: "" },
@@ -36,6 +52,7 @@ export class Recipients {
     };
     #profile = {
         role: ROLES.STANDARD,
+        notifiedAt: null,
     };
     constructor(data) {
         this._id = data._id;
@@ -65,17 +82,16 @@ export class Recipients {
     }
     updateConfig(config) {
         for (let key in config) {
-            if (this.#config[key]) {
-                for (let k in config[key]) {
-                    if (this.#config[key][k].hasOwnProperty(k)) {
-                        this.#config[key][k] = config[key][k];
-                    }
-                }
+            if (this.#config.hasOwnProperty(key)) {
+                this.#config[key] = config[key];
             }
         }
     }
-    updateNotifiedAt() {
+    updateNotifiedAt({ message = "", attachment = [], msgId = "", status = "queued" }) {
         this.#profile.notifiedAt = moment().valueOf();
+        const notification = new Notifications(this._id, this.#profile.notifiedAt, message, attachment, msgId, status);
+        const lastNotifID = notification.save();
+        this.#profile.lastNotifID = lastNotifID;
     }
     isCooldown() {
         if (this.#profile.notifiedAt) {

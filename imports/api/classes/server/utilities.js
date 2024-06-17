@@ -1,4 +1,4 @@
-import PhoneNumber from "awesome-phonenumber";
+import { parsePhoneNumber } from "awesome-phonenumber";
 
 class Utilities {
     constructor() { }
@@ -36,12 +36,12 @@ class Utilities {
     showDebug() {
         Util.log.apply(this, [`${"[Debug]".magenta}${":".white} ${arguments[0]}`].concat(Util.formatArgs(arguments)));
     }
-    numberValidator(input, region = "US") {
+    numberValidator(input, regionCode = "US") {
         if (!input) return { isValid: false };
-        const phone = PhoneNumber(input, region);
-        if (phone.isValid()) {
+        const phone = parsePhoneNumber(input, { regionCode });
+        if (phone.valid) {
             let isUS = false;
-            switch (phone.getRegionCode()) {
+            switch (phone.regionCode) {
                 case "US": case "CA":
                 case "AG": case "AI": case "AS": case "BB": case "BM": case "BS":
                 case "DM": case "DO": case "GD": case "GU": case "JM": case "KN":
@@ -51,17 +51,17 @@ class Utilities {
                     break;
             }
             return {
-                isValid: phone.isValid(),
-                type: phone.getType(),
+                isValid: phone.valid,
+                type: phone.type,
                 fromUS: isUS,
-                region: phone.getRegionCode(),
-                internationalFormat: phone.getNumber("international"),
-                nationalFormat: phone.getNumber("national"),
-                e164Format: phone.getNumber("e164"),
-                rfc3966Format: phone.getNumber("rfc3966"),
-                significant: phone.getNumber("significant"),
+                region: phone.regionCode,
+                internationalFormat: phone.number.international,
+                nationalFormat: phone.number.national,
+                e164Format: phone.number.e164,
+                rfc3966Format: phone.number.rfc3966,
+                significant: phone.number.significant,
                 number: input,
-                country: phone.getCountryCode()
+                country: phone.countryCode
             };
         }
         return { isValid: false };
