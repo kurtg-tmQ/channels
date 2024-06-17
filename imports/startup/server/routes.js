@@ -78,14 +78,10 @@ Meteor.startup(() => {
                 }
             });
             if (firstBatch.length)
-                await Promise.all(firstBatch.map((s) => s())).then((e) => {
-                    Utilities.showStatus("First Batch Done", firstBatch.length);
-                });
+                await Promise.all(firstBatch.map((s) => s()));
             if (secondBatch.length)
-                await Promise.all(secondBatch.map((s) => s())).then((e) => {
-                    Utilities.showStatus("Second Batch Done", secondBatch.length);
-                });
-
+                await Promise.all(secondBatch.map((s) => s()));
+            Utilities.showDebug("SMS Sent: %s, 1st: `%s`, 2nd: `%s`", JSON.stringify(request.body.message), firstBatch.length, secondBatch.length);
             response.writeHead(200, { "Content-Type": "application/json" });
             response.end(JSON.stringify({ status: "OK" }));
         } catch (error) {
@@ -95,6 +91,7 @@ Meteor.startup(() => {
         }
     });
     Picker.route("/api/v1/receipts", async function (params, request, response) {
+        Utilities.showDebug("Receipts: %s", JSON.stringify(request.body));
         DB.Notification.rawCollection().findOneAndUpdate({ msgId: request.body.SmsSid }, { $set: { status: request.body.SmsStatus } });
         response.writeHead(200, { "Content-Type": "application/json" });
         response.end(JSON.stringify({ status: "OK" }));

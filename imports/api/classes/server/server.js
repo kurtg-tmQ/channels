@@ -51,7 +51,7 @@ class Server {
     }
     async startup() {
         try {
-            Utilities.showStatus("Starting up server...", this.Config);
+            Utilities.showStatus("Starting up server...");
             await Promise.all([this.registerIndexes()], this.initChannels());
         } catch (error) {
             Utilities.showError("Error starting up server! err: %s", error.message);
