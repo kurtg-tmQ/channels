@@ -70,11 +70,19 @@ class Utilities {
         return Buffer.from(`${username}:${password}`).toString("base64");
     }
     trimLeadingCharacters(str) {
-        let index = 0;
-        while (index < str.length && (str[index] === '\r' || str[index] === '\n')) {
-            index++;
+        // Remove leading \r and \n
+        let startIndex = 0;
+        while (startIndex < str.length && (str[startIndex] === '\r' || str[startIndex] === '\n')) {
+            startIndex++;
         }
-        return str.substring(index);
+
+        // Remove trailing \r and \n
+        let endIndex = str.length - 1;
+        while (endIndex >= 0 && (str[endIndex] === '\r' || str[endIndex] === '\n')) {
+            endIndex--;
+        }
+
+        return str.substring(startIndex, endIndex + 1);
     }
 }
 
