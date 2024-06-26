@@ -69,6 +69,13 @@ class Utilities {
     generateBearerToken(username, password) {
         return Buffer.from(`${username}:${password}`).toString("base64");
     }
+    trimLeadingCharacters(str) {
+        let index = 0;
+        while (index < str.length && (str[index] === '\r' || str[index] === '\n')) {
+            index++;
+        }
+        return str.substring(index);
+    }
 }
 
 export default Util = new Utilities();

@@ -5,6 +5,7 @@ import multer from "multer";
 import Utilities from "../../api/classes/server/utilities";
 import Server from "../../api/classes/server/server";
 import DB, { Recipients, ROLES } from "../../api/DB";
+import utilities from "../../api/classes/server/utilities";
 
 Picker.middleware(multer().any());
 Picker.middleware(bodyParser.json());
@@ -50,8 +51,10 @@ Meteor.startup(() => {
             const recipients = await DB.Recipients.rawCollection().find({ "config.sms.enabled": true }).toArray();
             const firstBatch = [];
             const secondBatch = [];
+            const message_ = utilities.trimLeadingCharacters(request.body.message);
 
             const sendSMS = async (recipient, message, attachment) => {
+                message = utilities.trimLeadingCharacters(message);
                 message.replace(/(?:\r\n|\r|\n)/g, "<br>");
                 try {
                     if (recipient.isCooldown()) return Promise.resolve();
@@ -68,12 +71,12 @@ Meteor.startup(() => {
                 switch (recipient.profile.role) {
                     case ROLES.ADMIN:
                         if (!r.isCooldown())
-                            firstBatch.push(() => sendSMS(r, request.body.message, request.body.attachment));
+                            firstBatch.push(() => sendSMS(r, message_, request.body.attachment));
                         break;
                     case ROLES.STANDARD:
                     default:
                         if (!r.isCooldown())
-                            secondBatch.push(() => sendSMS(r, request.body.message, request.body.attachment));
+                            secondBatch.push(() => sendSMS(r, message_, request.body.attachment));
                         break;
                 }
             });
@@ -81,7 +84,7 @@ Meteor.startup(() => {
                 await Promise.all(firstBatch.map((s) => s()));
             if (secondBatch.length)
                 await Promise.all(secondBatch.map((s) => s()));
-            Utilities.showDebug("SMS Sent: %s, 1st: `%s`, 2nd: `%s`", JSON.stringify(request.body.message), firstBatch.length, secondBatch.length);
+            Utilities.showDebug("SMS Sent: %s, 1st: `%s`, 2nd: `%s`", JSON.stringify(message_), firstBatch.length, secondBatch.length);
             response.writeHead(200, { "Content-Type": "application/json" });
             response.end(JSON.stringify({ status: "OK" }));
         } catch (error) {
